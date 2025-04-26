@@ -4,12 +4,9 @@
     <title>Error</title>
 </head>
 <body>
-    <h2>Login Failure</h2>
-    <dl>
-        <dt>{{ result.get("error") }}</dt>
-        <dd>{{ result.get("error_description") }}</dd>
-    </dl>
+    <h2>Login Failure - Unauthorized</h2>
+
     <hr>
-    <a href="{{ url_for('index') }}">Homepage</a>
+    <a href="{{ url_for('login') }}">Login</a> or <a href="{{url_for('index')}}">Front page</a>
 </body>
 </html>

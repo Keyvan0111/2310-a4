@@ -19,7 +19,7 @@ AUTHORITY = f'https://login.microsoftonline.com/{TENANT_ID}'
 SESSION_SECRET = uuid.uuid4()
 
 # TODO: Figure out what scopes you need to use
-SCOPES = ["User.Read"]
+SCOPES = ["User.Read", "User.ReadWrite", "User.ReadBasic.All"]
 
 # TODO: Figure out the URO where Azure will redirect to after authentication. After deployment, this should
 #  be on your server. The URI must match one you have configured in your application registration.
@@ -47,37 +47,29 @@ auth = identity.web.Auth(session=session,
 @app.route("/login")
 def login():
     try:
-        print(">> /login: Initiating authentication")
         rs = auth.log_in(SCOPES, REDIRECT_URI)
-        print(">> /login: Auth URI generated:", rs["auth_uri"])
-        return render_template("login.html", auth_uri=rs["auth_uri"])
+        auth_uri = rs["auth_uri"] + "&prompt=consent"
+        return render_template("login.html", auth_uri=auth_uri)
     except Exception as e:
-        print(">> Error in /login:", str(e))
         return f"<h1>Login Error</h1><pre>{str(e)}</pre>", 500
 
 @app.route(REDIRECT_PATH)
 def auth_response():
     try:
-        print(">> GET /getAToken hit")
         result = auth.complete_log_in(request.args)
-        print(">> Result from complete_log_in:", result)
 
         if result.get("error"):
-            print(">> Auth error:", result["error_description"])
             return render_template("auth_error.html", result=result)
 
-        print(">> Authentication successful, redirecting to /")
         return redirect("/")
     except Exception as e:
-        print(">> Exception in /getAToken:", str(e))
-        import traceback
-        traceback.print_exc()
         return f"<h1>Auth Error</h1><pre>{str(e)}</pre>", 500
 
 @app.route("/logout")
 def logout():
     auth.log_out(url_for("index"))
     return redirect("/")
+
 
 @app.route("/")
 def index():
@@ -90,7 +82,8 @@ def index():
 def get_profile():
     if not auth.get_user():
         flash("Please log in to access this page.", "error")
-        return redirect("/login")
+        return render_template("auth_error.html")
+
 
     token = auth.get_token_for_user(SCOPES)
     headers = {"Authorization": "Bearer " + token["access_token"]}
@@ -102,7 +95,7 @@ def get_profile():
 def post_profile():
     if not auth.get_user():
         flash("Please log in to access this page.", "error")
-        return redirect("/login")
+        return render_template("auth_error.html")
 
     token = auth.get_token_for_user(SCOPES)
     headers = {"Authorization": "Bearer " + token["access_token"], "Content-Type": "application/json"}
@@ -128,14 +121,19 @@ def post_profile():
 
 @app.route("/users")
 def get_users():
-    if not auth.get_user():
-        flash("Please log in to access this page.", "error")
-        return redirect("/login")
 
-    token = auth.get_token_for_user(SCOPES)
-    headers = {"Authorization": "Bearer " + token["access_token"]}
-
-    result = requests.get('https://graph.microsoft.com/v1.0/users', headers=headers)
+    # TODO: Check that user is logged in and add credentials to the request.
+    access_token = auth.get_token_for_user(["User.ReadWrite", "User.ReadBasic.All"])
+    print(access_token)
+    if "error" in access_token:
+        return render_template('auth_error.html', result=access_token)
+    result = requests.get(
+        'https://graph.microsoft.com/v1.0/users',
+        headers={'Authorization': 'Bearer ' + access_token["access_token"]},
+        timeout=30,
+    )
+    print("result:\n")
+    print(result.json)
     return render_template('users.html', result=result.json())
 
 if __name__ == "__main__":
