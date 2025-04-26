@@ -2,17 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>INF-2310 Assignment 3</title>
+    <title>Dashboard</title>
 </head>
 <body>
-    <h1>Welcome {{ user.name }}</h1>
-
+    <h1>Welcome {{ user.displayName or user.userPrincipalName }}</h1>
     <h2>Menu</h2>
     <ul>
         <li><a href='/users'>Show Users</a></li>
         <li><a href='/profile'>Edit Profile</a></li>
         <li><a href="/logout">Logout</a></li>
     </ul>
-
 </body>
 </html>

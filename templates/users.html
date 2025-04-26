@@ -5,16 +5,12 @@
     <title>Users</title>
 </head>
 <body>
-
     <h1>Tenant Users</h1>
     <ul>
         {% for user in result.value %}
-            <li class="flash">{{ user.displayName }}</li>
+            <li>{{ user.displayName }}</li>
         {% endfor %}
     </ul>
-
-    <!-- Print json -->
-    <!-- pre> {{ result |tojson(indent=4) }}</pre -->
-<a href="/">back</a>
+    <a href="/">Back</a>
 </body>
 </html>

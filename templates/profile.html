@@ -5,53 +5,29 @@
     <title>Profile</title>
 </head>
 <body>
-
     <h1>Update Your Profile</h1>
 
-    {% if result != None %}
+    {% if result %}
         <div style="margin-bottom: 12px; padding: 7px; background-color: lightgray">
             {% if result.ok %}
-                Profile stored!
+                Profile updated successfully!
             {% else %}
-                <div>{{result.text}}</div>
+                <div>Error: {{ result.error }}</div>
             {% endif %}
         </div>
     {% endif %}
 
-        <form method="post">
-            <label for="title">User ID </label><br>
-          <input type="text" name="id"
-               value="{{user.id}}"/>
-        <br>
-
-        <label for="title">Display Name</label><br>
-        <input type="text" name="displayName"
-               value="{{user.displayName}}"/>
-        <br>
-
-        <label for="title">Given Name</label><br>
-        <input type="text" name="givenName"
-               value="{{user.givenName}}" />
-        <br>
-
-        <label for="title">Surname</label><br>
-        <input type="text" name="surname"
-               value="{{user.surname}}" />
-        <br>
-
-        <label for="title">Phonenr</label><br>
-        <input type="text" name="mobilePhone"
-               value="{{user.mobilePhone}}" />
-        <br><br>
+    <form method="post">
+        <input type="hidden" name="id" value="{{user.id}}"/>
+        <label for="mobilePhone">Mobile Phone</label><br>
+        <input type="text" name="mobilePhone" value="{{user.mobilePhone or ''}}"/><br>
+        <label for="businessPhones">Business Phone</label><br>
+        <input type="text" name="businessPhones" value="{{user.businessPhones[0] or ''}}"/><br><br>
         <button type="submit">Submit</button>
     </form>
 
-<div style="padding-top: 2rem">
-<a href="/">back</a>
-</div>
-
-<!-- Print json -->
-<!-- pre> {{ user |tojson(indent=4) }}</pre-->
-
+    <div style="padding-top: 2rem">
+        <a href="/">Back</a>
+    </div>
 </body>
 </html>
