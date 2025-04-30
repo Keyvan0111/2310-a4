@@ -26,14 +26,20 @@ SCOPES = ["User.Read", "User.ReadWrite", "User.ReadBasic.All"]
 
 # TODO: Figure out the URO where Azure will redirect to after authentication. After deployment, this should
 #  be on your server. The URI must match one you have configured in your application registration.
-port_num = os.getenv("PORT_NUM")
-REDIRECT_URI = f"http://localhost:{port_num}/getAToken"
+port_num = os.getenv("PORT_NUM_PROD") if os.getenv("ENV_FLASK") == "production" else os.getenv("PORT_NUM")
+
+IS_PRODUCTION = os.getenv("ENV_FLASK") == "production"
+
+if IS_PRODUCTION:
+    REDIRECT_URI = os.getenv("REDIRECT_URI")
+else:
+    REDIRECT_URI = f"http://localhost:{port_num}/getAToken"
 
 REDIRECT_PATH = "/getAToken"
 
 app = Flask(__name__)
 
-IS_PRODUCTION = os.getenv("ENV_FLASK") == "production"
+
 
 app.config.update(
     SESSION_COOKIE_NAME='session',
