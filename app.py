@@ -23,17 +23,21 @@ SCOPES = ["User.Read", "User.ReadWrite", "User.ReadBasic.All"]
 
 # TODO: Figure out the URO where Azure will redirect to after authentication. After deployment, this should
 #  be on your server. The URI must match one you have configured in your application registration.
-REDIRECT_URI = "http://localhost:5000/getAToken"
+REDIRECT_URI = "http://localhost:5001/getAToken"
 
 REDIRECT_PATH = "/getAToken"
 
 app = Flask(__name__)
-app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # Allow cross-site redirects
-app.config['SESSION_COOKIE_NAME'] = 'session'   # Consistent cookie name
-app.config['SECRET_KEY'] = SESSION_SECRET
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['TESTING'] = True
-app.config['DEBUG'] = True
+
+IS_PRODUCTION = os.getenv("FLASK_ENV") == "production"
+
+app.config.update(
+    SESSION_COOKIE_NAME='session',
+    SESSION_TYPE='filesystem',
+    SECRET_KEY=SESSION_SECRET,
+    SESSION_COOKIE_SAMESITE="None" if IS_PRODUCTION else "Lax",
+    SESSION_COOKIE_SECURE=True if IS_PRODUCTION else False,
+)
 Session(app)
 
 # The auth object provide methods for interacting with the Microsoft OpenID service.
@@ -137,4 +141,4 @@ def get_users():
     return render_template('users.html', result=result.json())
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=5001, debug=not IS_PRODUCTION)
