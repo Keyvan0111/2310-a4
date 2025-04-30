@@ -4,6 +4,9 @@ import requests
 import os
 from flask import Flask, redirect, render_template, request, session, url_for, flash
 from flask_session import Session
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # The following variables are required for the app to run.
 
@@ -23,13 +26,14 @@ SCOPES = ["User.Read", "User.ReadWrite", "User.ReadBasic.All"]
 
 # TODO: Figure out the URO where Azure will redirect to after authentication. After deployment, this should
 #  be on your server. The URI must match one you have configured in your application registration.
-REDIRECT_URI = "http://localhost:5001/getAToken"
+port_num = os.getenv("PORT_NUM")
+REDIRECT_URI = f"http://localhost:{port_num}/getAToken"
 
 REDIRECT_PATH = "/getAToken"
 
 app = Flask(__name__)
 
-IS_PRODUCTION = os.getenv("FLASK_ENV") == "production"
+IS_PRODUCTION = os.getenv("ENV_FLASK") == "production"
 
 app.config.update(
     SESSION_COOKIE_NAME='session',
@@ -37,6 +41,8 @@ app.config.update(
     SECRET_KEY=SESSION_SECRET,
     SESSION_COOKIE_SAMESITE="None" if IS_PRODUCTION else "Lax",
     SESSION_COOKIE_SECURE=True if IS_PRODUCTION else False,
+    TESTING=not IS_PRODUCTION,
+    DEBUG=not IS_PRODUCTION,
 )
 Session(app)
 
@@ -141,4 +147,4 @@ def get_users():
     return render_template('users.html', result=result.json())
 
 if __name__ == "__main__":
-    app.run(port=5001, debug=not IS_PRODUCTION)
+    app.run(port=int(port_num))
